@@ -1,55 +1,38 @@
 
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import CardList from './components/card-list/card-list.component';
 import SearchBox from './components/search-box/search-box.component';
 
 import './App.css';
 
-class App extends Component {
-constructor() {
-  super();
-  this.state = {
-    monsters: [],
-    searchField: ''
-  };
-}
+const App = () => {
 
- componentDidMount() {
-  fetch('https://jsonplaceholder.typicode.com/users')
-    .then((response) => response.json())
-    .then(users => 
-      this.setState(() => {
-        return { 
-                monsters: users,
-            };
-          },
-          () => {
-            console.log(this.state)
-          }
-        )
-      );
- }
+  const [searchField, setSearchField] = useState("");
+  const [monsters, setMonsters] = useState([]);
+  const [items, setItems] = useState(monsters)
 
- onSearchChange = (event) => {
-  console.log(event.target.value)
-  const searchField = event.target.value.toLocaleLowerCase();
-  
-  this.setState(() => {
-      return {
-      searchField
-      };
-  })
-}
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then((response) => response.json())
+      .then((users) => setMonsters(users));
+  }, [])
 
-render(){
-  const items = this.state.monsters.filter((monster) => { 
-    return monster.name.toLocaleLowerCase().includes(this.state.searchField);
-   });
+  useEffect(() => {
+      const values = monsters.filter((monster) => { 
+            return monster.name.toLocaleLowerCase().includes(searchField);
+           });
+      setItems(values)
+  }, [monsters, searchField])
 
-  const { onSearchChange } = this;
+  const onSearchChange = (event) => {
+      console.log(event.target.value)
+      const searchFieldString = event.target.value.toLocaleLowerCase();
+      setSearchField(searchFieldString)
 
-  return (
+  }
+
+    return (
     <div className="App">
       <h1 className='app-title'>Monsters Rolodex</h1>
       <SearchBox 
@@ -57,11 +40,9 @@ render(){
       placeholder="Search Monsters"
       className='monster-search-box' 
       />
-      <CardList monsters={ items }/>
-      
+      <CardList monsters = { items }/>
     </div>
   );
-}
 
 }
 
